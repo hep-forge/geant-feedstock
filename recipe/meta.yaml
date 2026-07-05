@@ -50,7 +50,6 @@ requirements:
     - libglu  # [linux]
     - qt6-main
     - xerces-c
-    - hdf5
     - xorg-libx11
     - xorg-libxfixes
     - xorg-libxmu
@@ -62,7 +61,6 @@ requirements:
     - zlib
     - libglu  # [linux]
     - freetype  # [unix]
-    - hdf5
     - xorg-libx11
     - xorg-libxmu
     - xorg-libxt

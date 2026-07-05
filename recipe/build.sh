@@ -3,6 +3,15 @@
 # proven, currently-passing recipe) -- deviations from it are limited to:
 # name (geant, not geant4), source (this fork's commit), and
 # CMAKE_CXX_STANDARD=20 (not 17, needed for downstream ACTS/DD4hep compat).
+#
+# GEANT4_USE_HDF5=OFF (conda-forge has it ON): Geant4's bundled g4tools
+# HDF5 histogram/analysis-output wrapper (source/externals/g4tools) calls
+# H5Dcreate2/H5Dopen2/etc. with a fixed, older arg count that doesn't
+# match conda-forge's current hdf5 build's API mapping ("too few
+# arguments" compile errors). Not in the originally requested EIC
+# variant set (+opengl+qt+x11+threads-vecgeom-vtk never mentions hdf5)
+# and not needed downstream by dd4hep either -- just drop it rather
+# than chase HDF5's default-API-version compile defines.
 set -eux
 
 test -f "${SRC_DIR}/src/CMakeLists.txt"
@@ -27,7 +36,7 @@ cmake \
     -DGEANT4_USE_FREETYPE=ON \
     -DGEANT4_USE_GDML=ON \
     -DGEANT4_USE_QT=ON \
-    -DGEANT4_USE_HDF5=ON \
+    -DGEANT4_USE_HDF5=OFF \
     -DGEANT4_USE_SYSTEM_CLHEP=ON \
     -DGEANT4_USE_SYSTEM_EXPAT=ON \
     -DGEANT4_USE_SYSTEM_ZLIB=ON \
