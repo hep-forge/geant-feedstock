@@ -1,5 +1,8 @@
 {% set versions = {
-    "0.0.0": "REPLACE_WITH_SHA256"
+    "11.4.1": "fb0090b005563311a866e3b40804ff762dc1d00d81f8aa881ba872538608a719"
+} %}
+{% set commits = {
+    "11.4.1": "0efa58fb6848c2e0f50362d017c2526bf95dcf01"
 } %}
 
 {% set version = environ.get('COMMIT_VERSION', None) %}
@@ -13,36 +16,103 @@ package:
   version: {{ environ.get('ANACONDA_VERSION', version)|replace("-", ".") }}
 
 source:
-  url: "https://github.com/eic/geant4/archive/refs/tags/{{ version }}.tar.gz"   # TODO: confirm upstream's actual tag/tarball naming
+  # eic/geant4's "east-vX.Y.Z" branches are exactly vanilla Geant4 vX.Y.Z
+  # plus one additive commit (the eAST baseline physics list, no build-system
+  # changes) -- pin the exact commit rather than the mutable branch tip.
+  url: "https://github.com/eic/geant4/archive/{{ commits.get(version, version) }}.tar.gz"
   {% if versions.get(version, None) %}
   sha256: {{ versions.get(version) }}
   {% endif %}
+  folder: src
 
 build:
   number: 0
+  string: "eic"
+  skip: true  # [win]
   run_exports:
     - {{ pin_subpackage(name, max_pin="x.x.x") }}
 
 requirements:
   build:
     - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
     - {{ stdlib('c') }}
+    - {{ compiler('cxx') }}
     - cmake
-    - make
+    - make  # [unix]
+    - sed
   host:
-    # TODO: library dependencies
+    - python
+    - libboost-python-devel
+    - clhep =2.4.7.2
+    - expat
+    - zlib
+    - freetype
+    - libglu  # [linux]
+    - qt6-main
+    - xerces-c
+    - hdf5
+    - xorg-libx11
+    - xorg-libxfixes
+    - xorg-libxmu
+    - xorg-libxt
+    - libgl-devel  # [linux]
   run:
-    # TODO: runtime dependencies
+    - python
+    - expat
+    - zlib
+    - libglu  # [linux]
+    - freetype  # [unix]
+    - hdf5
+    - xorg-libx11
+    - xorg-libxmu
+    - xorg-libxt
+    - libgl-devel  # [linux]
+    - xorg-libxfixes  # [linux]
+    # versions taken from cmake/Modules/G4DatasetDefinitions.cmake at this
+    # tag, matched against what conda-forge's geant4-data-* feedstocks
+    # actually publish (their own recipe's stated ".0"-suffix convention
+    # doesn't hold for all of these -- verified directly against
+    # conda-forge's noarch repodata rather than assumed).
+    - geant4-data-abla =3.3
+    - geant4-data-emlow =8.8.0
+    - geant4-data-ensdfstate =3.0
+    - geant4-data-incl =1.3.0
+    - geant4-data-ndl =4.7.1
+    - geant4-data-particlexs =4.2.0
+    - geant4-data-photonevaporation =6.1.2
+    - geant4-data-pii =1.3
+    - geant4-data-radioactivedecay =6.1.2
+    - geant4-data-realsurface =2.2
+    - geant4-data-saiddata =2.0
+    - geant4-data-channeling =2.0.0
 
 test:
+  requires:
+    - cmake
+    - make  # [unix]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
   commands:
-    - echo "TODO: a real smoke test"
+    - geant4-config --version
+    - bash "${RECIPE_DIR}/test_geant4.sh"
 
 about:
   home: "https://github.com/eic/geant4"
-  license: "Apache-2.0"
-  summary: "Geant4 detector simulation toolkit (eic label: EIC's eAST-physics-list fork)"
+  dev_url: "https://github.com/eic/geant4"
+  doc_url: "https://geant4.web.cern.ch/support"
+  license: "LicenseRef-Geant4"
+  license_file: src/LICENSE
+  summary: "Geant4 detector simulation toolkit, EIC eAST-physics-list fork (eic label)"
+  description: |
+    This build is github.com/eic/geant4, branch east-v11.4.1 -- vanilla
+    Geant4 11.4.1 plus one additive commit registering "eASTPhysicsList",
+    the baseline physics list used across EIC detector simulation. No
+    build-system changes versus vanilla Geant4; published under the
+    "eic" label so it doesn't collide with a future vanilla geant3/geant4
+    build under this same package's "main" label, and under the package
+    name "geant" (not "geant4") so it doesn't get silently shadowed by
+    conda-forge's own same-named, numerically newer geant4 package under
+    flexible channel priority.
 
 extra:
   recipe-maintainers:

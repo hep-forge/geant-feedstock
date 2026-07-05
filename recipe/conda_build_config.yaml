@@ -10,3 +10,9 @@ c_compiler:
   - gcc
 cxx_compiler:
   - gxx
+
+# pin to one python (libboost-python-devel is python-version-tagged;
+# without this conda-build tries conda-forge's whole default python
+# matrix, most of which nothing here actually needs)
+python:
+  - "3.12"
