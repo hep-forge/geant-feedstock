@@ -11,6 +11,16 @@ Builds linux-amd64 + linux-arm64 in one matrix workflow and uploads to the
 
 Geant4 detector simulation toolkit (eic label: EIC's eAST-physics-list fork)
 
+## Architectures
+
+| Architecture | Latest published |
+|--------------|------------------|
+| linux-amd64 (`linux-64`) | ❌ not published |
+| linux-arm64 (`linux-aarch64`) | ❌ not published |
+
+_As of the last feedstock render; the badges above are live._
+
+
 ## Install
 
 ```bash
@@ -20,3 +30,4 @@ conda install -c hep-forge -c conda-forge geant
 ## Maintainers
 
 * [@meiyasan](https://github.com/meiyasan/)
+
