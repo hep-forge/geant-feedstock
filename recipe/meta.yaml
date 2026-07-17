@@ -55,8 +55,14 @@ build:
   number: 0
   string: "east"
   skip: true  # [win]
-  run_exports:
-    - {{ pin_subpackage(name, max_pin="x.x.x") }}
+  # No run_exports: conda-build's pin_subpackage()/apply_pin_expressions
+  # silently drops the conda epoch when computing the pin bounds (e.g.
+  # "1!4.11.4.1" -> ">=4.11.4,<4.11.5.0a0", epoch gone entirely). Combined
+  # with a consumer's own explicit "geant >=X" pin, that produces a
+  # mixed-epoch compound MatchSpec the solver can't satisfy against the
+  # actual epoch-1 package. Every current consumer (g4hepem, dd4hep)
+  # already writes its own explicit geant version pin by hand, so nothing
+  # relies on this auto-generated one.
 
 requirements:
   build:
