@@ -4,17 +4,21 @@
 {% set commits = {
     "11.4.1": "0efa58fb6848c2e0f50362d017c2526bf95dcf01"
 } %}
-{# Geant4's own tag (e.g. "11.4.1") is that project's internal release
-   counter -- it does NOT mean "Geant generation 11". This package name
-   ("geant") is shared across generations (a future Geant3 build lives on
-   the "old" label; this Geant4 build is the "main"/default one -- this
-   whole channel is EIC-dedicated, so there's no separate "eic" label),
-   so the published conda version is prefixed with the actual generation
-   number ("4.") to stay unambiguous even if someone compares versions
-   across labels. An epoch (1!) is required alongside the rename:
-   without it, conda would read "4.11.4.1" as numerically OLDER than the
-   already-published "11.4.1" (4 < 11 in the first component) and never
-   offer it as an upgrade. #}
+# Geant4's own tag (e.g. "11.4.1") is that project's internal release
+# counter -- it does NOT mean "Geant generation 11". This package name
+# ("geant") is shared across generations (a future Geant3 build lives on
+# the "old" label; this Geant4 build is the "main"/default one -- this
+# whole channel is EIC-dedicated, so there's no separate "eic" label),
+# so the published conda version is prefixed with the actual generation
+# number ("4.") to stay unambiguous even if someone compares versions
+# across labels. An epoch (1!) is required alongside the rename:
+# without it, conda would read "4.11.4.1" as numerically OLDER than the
+# already-published "11.4.1" (4 < 11 in the first component) and never
+# offer it as an upgrade.
+# NOTE: use plain "#" comments here, not Jinja "{# #}" block comments --
+# the publish workflow's Trim Old Versions step regex-strips only
+# "{% %}"/"{{ }}" before yaml.safe_load'ing this file directly (no Jinja
+# render), so a literal "{# #}" block survives and breaks that parse.
 {% set published_versions = {
     "11.4.1": "1!4.11.4.1"
 } %}
@@ -25,12 +29,12 @@
 
 {% set name = environ.get('ANACONDA_PACKAGE', 'geant')|string|lower %}
 
-{# The CI workflow always sets ANACONDA_VERSION (derived from the git
-   tag, e.g. "11.4.1") before invoking conda-build, so environ.get's
-   fallback below never actually fires for the normal tag-driven build
-   path -- map through published_versions on whichever value wins first,
-   tag-driven or manually overridden, so the generation-prefixed/epoched
-   form is always what actually gets published. #}
+# The CI workflow always sets ANACONDA_VERSION (derived from the git
+# tag, e.g. "11.4.1") before invoking conda-build, so environ.get's
+# fallback below never actually fires for the normal tag-driven build
+# path -- map through published_versions on whichever value wins first,
+# tag-driven or manually overridden, so the generation-prefixed/epoched
+# form is always what actually gets published.
 {% set _raw_version = environ.get('ANACONDA_VERSION', version) %}
 
 package:
