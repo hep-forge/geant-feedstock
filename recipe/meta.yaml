@@ -6,14 +6,15 @@
 } %}
 {# Geant4's own tag (e.g. "11.4.1") is that project's internal release
    counter -- it does NOT mean "Geant generation 11". This package name
-   ("geant") is shared across generations (Geant3 on the "main" label,
-   this Geant4 build on the "eic" label), so the published conda version
-   is prefixed with the actual generation number ("4.") to stay
-   unambiguous even if someone compares versions across labels. An
-   epoch (1!) is required alongside the rename: without it, conda would
-   read "4.11.4.1" as numerically OLDER than the already-published
-   "11.4.1" (4 < 11 in the first component) and never offer it as an
-   upgrade. #}
+   ("geant") is shared across generations (a future Geant3 build lives on
+   the "old" label; this Geant4 build is the "main"/default one -- this
+   whole channel is EIC-dedicated, so there's no separate "eic" label),
+   so the published conda version is prefixed with the actual generation
+   number ("4.") to stay unambiguous even if someone compares versions
+   across labels. An epoch (1!) is required alongside the rename:
+   without it, conda would read "4.11.4.1" as numerically OLDER than the
+   already-published "11.4.1" (4 < 11 in the first component) and never
+   offer it as an upgrade. #}
 {% set published_versions = {
     "11.4.1": "1!4.11.4.1"
 } %}
@@ -48,7 +49,7 @@ source:
 
 build:
   number: 0
-  string: "eic"
+  string: "east"
   skip: true  # [win]
   run_exports:
     - {{ pin_subpackage(name, max_pin="x.x.x") }}
@@ -121,17 +122,20 @@ about:
   doc_url: "https://geant4.web.cern.ch/support"
   license: "LicenseRef-Geant4"
   license_file: src/LICENSE
-  summary: "Geant4 detector simulation toolkit, EIC eAST-physics-list fork (eic label)"
+  summary: "Geant4 detector simulation toolkit, EIC eAST-physics-list fork"
   description: |
     This build is github.com/eic/geant4, branch east-v11.4.1 -- vanilla
     Geant4 11.4.1 plus one additive commit registering "eASTPhysicsList",
     the baseline physics list used across EIC detector simulation. No
-    build-system changes versus vanilla Geant4; published under the
-    "eic" label so it doesn't collide with a future vanilla geant3/geant4
-    build under this same package's "main" label, and under the package
-    name "geant" (not "geant4") so it doesn't get silently shadowed by
-    conda-forge's own same-named, numerically newer geant4 package under
-    flexible channel priority.
+    build-system changes versus vanilla Geant4. This is hep-forge's
+    default/"main"-label geant build -- this whole channel is
+    EIC-dedicated, so there's no separate "eic" label; a future Geant3
+    build would live on the "old" label instead. Published under the
+    package name "geant" (not "geant4") so it doesn't get silently
+    shadowed by conda-forge's own same-named, numerically newer geant4
+    package under flexible channel priority; the published version is
+    prefixed with the actual Geant generation number ("4.") so it stays
+    unambiguous against a future Geant3 build under this same name.
 
 extra:
   recipe-maintainers:
