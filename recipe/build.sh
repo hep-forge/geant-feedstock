@@ -18,6 +18,13 @@ test -f "${SRC_DIR}/src/CMakeLists.txt"
 
 mkdir geant4-build
 
+# The X11 OpenGL viewer and X11 ray tracer need XQuartz's GL on macOS, which
+# conda-forge does not provide; the Qt viewer covers macOS.
+X11_VIS=ON
+if [[ "$(uname)" == "Darwin" ]]; then
+    X11_VIS=OFF
+fi
+
 cmake \
     -B ./geant4-build \
     -S "${SRC_DIR}/src" \
@@ -40,8 +47,8 @@ cmake \
     -DGEANT4_USE_SYSTEM_CLHEP=ON \
     -DGEANT4_USE_SYSTEM_EXPAT=ON \
     -DGEANT4_USE_SYSTEM_ZLIB=ON \
-    -DGEANT4_USE_OPENGL_X11=ON \
-    -DGEANT4_USE_RAYTRACER_X11=ON \
+    -DGEANT4_USE_OPENGL_X11=${X11_VIS} \
+    -DGEANT4_USE_RAYTRACER_X11=${X11_VIS} \
     -DQT_QMAKE_EXECUTABLE="${PREFIX}/bin/qmake6"
 
 NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
