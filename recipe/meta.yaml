@@ -81,6 +81,8 @@ requirements:
     - freetype
     - libglu  # [linux]
     - qt6-main
+    # Qt6Gui's CMake config looks for Vulkan headers on macOS (WrapVulkanHeaders)
+    - libvulkan-headers  # [osx]
     - xerces-c
     - xorg-libx11
     - xorg-libxfixes
