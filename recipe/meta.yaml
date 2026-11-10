@@ -6,9 +6,8 @@
 } %}
 # Geant4's own tag (e.g. "11.4.1") is that project's internal release
 # counter -- it does NOT mean "Geant generation 11". This package name
-# ("geant") is shared across generations (a future Geant3 build lives on
-# the "old" label; this Geant4 build is the "main"/default one -- this
-# whole channel is EIC-dedicated, so there's no separate "eic" label),
+# ("geant") is shared across generations and labels (main: conda-forge's
+# geant4; legacy: Geant3; eic: this eAST fork of Geant4),
 # so the published conda version is prefixed with the actual generation
 # number ("4.") to stay unambiguous even if someone compares versions
 # across labels. An epoch (1!) is required alongside the rename:
@@ -139,15 +138,12 @@ about:
     This build is github.com/eic/geant4, branch east-v11.4.1 -- vanilla
     Geant4 11.4.1 plus one additive commit registering "eASTPhysicsList",
     the baseline physics list used across EIC detector simulation. No
-    build-system changes versus vanilla Geant4. This is hep-forge's
-    default/"main"-label geant build -- this whole channel is
-    EIC-dedicated, so there's no separate "eic" label; a future Geant3
-    build would live on the "old" label instead. Published under the
-    package name "geant" (not "geant4") so it doesn't get silently
-    shadowed by conda-forge's own same-named, numerically newer geant4
-    package under flexible channel priority; the published version is
-    prefixed with the actual Geant generation number ("4.") so it stays
-    unambiguous against a future Geant3 build under this same name.
+    build-system changes versus vanilla Geant4. Published on hep-forge's
+    "eic" label (conda install -c hep-forge/label/eic geant); the main
+    label's geant points at conda-forge's geant4 and the legacy label
+    carries Geant3. Named "geant" (not "geant4") so it is not shadowed
+    by conda-forge's geant4 under flexible channel priority; the epoch
+    and the "4." prefix keep its versions apart from both.
 
 extra:
   recipe-maintainers:
