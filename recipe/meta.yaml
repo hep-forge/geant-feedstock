@@ -8,8 +8,8 @@
 
 # Default (main label) "geant" is a proxy for conda-forge, nothing is
 # compiled: the major picks the conda-forge package. conda-forge has no
-# Geant3 package; add one here once it exists, or build Geant3 on its own
-# branch/label. The EIC eAST-physics-list fork is built on the "eic" branch
+# Geant3 package: Geant3 is compiled on the geant3 branch and published on
+# the geant3 label (-c hep-forge/label/geant3). The EIC eAST-physics-list fork is built on the "eic" branch
 # and published on the "eic" label (-c hep-forge/label/eic).
 {% set cf_packages = {
     "11": "geant4",
