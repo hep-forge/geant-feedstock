@@ -5,18 +5,18 @@
 [![Anaconda Version](https://anaconda.org/hep-forge/geant/badges/version.svg)](https://anaconda.org/hep-forge/geant)
 [![Anaconda Platforms](https://anaconda.org/hep-forge/geant/badges/platforms.svg)](https://anaconda.org/hep-forge/geant)
 
-Feedstock for [geant](https://github.com/eic/geant4) — part of [hep-forge](https://anaconda.org/hep-forge).
+Feedstock for [geant](https://geant4.web.cern.ch) — part of [hep-forge](https://anaconda.org/hep-forge).
 Builds linux-amd64 + linux-arm64 in one matrix workflow and uploads to the
 [hep-forge](https://anaconda.org/hep-forge) Anaconda channel.
 
-Geant4 detector simulation toolkit, EIC eAST-physics-list fork
+Geant4 detector simulation toolkit, from conda-forge's geant4 (EIC eAST fork on the eic label)
 
 ## Architectures
 
 | Architecture | Latest published |
 |--------------|------------------|
-| linux-amd64 (`linux-64`) | ✅ `1!4.11.4.1` |
-| linux-arm64 (`linux-aarch64`) | ✅ `1!4.11.4.1` |
+| linux-amd64 (`linux-64`) | ✅ `1!11.4.3` |
+| linux-arm64 (`linux-aarch64`) | ✅ `1!11.4.3` |
 
 _As of the last feedstock render; the badges above are live._
 
