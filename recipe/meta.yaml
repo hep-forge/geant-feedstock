@@ -1,45 +1,80 @@
 {% set versions = {
-    "11.4.3": ""
+    "11.4.3": "",
+    "3.21.4.5": "0fbfe4a9e50b3bc8af7efc11d2b167c341ba0ec3103ddbdf6d88736fd1f26e23"
+} %}
+# Geant3 version -> the vmc-project/geant3 release it builds (Geant3.21 +
+# TGeant3 release 4-5)
+{% set geant3_releases = {
+    "3.21.4.5": "v4-5"
 } %}
 
 {% set version = environ.get('COMMIT_VERSION', None) %}
 {% set version = version or versions.keys()|first %}
 {% set version = version|string %}
 
-# Default (main label) "geant" is a proxy for conda-forge, nothing is
-# compiled: the major picks the conda-forge package. conda-forge has no
-# Geant3 package: Geant3 is compiled on the geant3 branch and published on
-# the geant3 label (-c hep-forge/label/geant3). The EIC eAST-physics-list fork is built on the "eic" branch
-# and published on the "eic" label (-c hep-forge/label/eic).
-{% set cf_packages = {
-    "11": "geant4",
-    "10": "geant4"
-} %}
-{% set cf_package = cf_packages[version.split('.')[0]] %}
-#
-# Published as "1!<conda-forge version>": the epoch keeps it above the
-# earlier "1!4.11.4.1" eAST upload still on the main label.
+# One "geant" on the main label, the generation chosen by version:
+#   conda install -c hep-forge geant           -> Geant4 (conda-forge's geant4)
+#   conda install -c hep-forge "geant<4"       -> Geant3 (compiled here)
+# Geant4 (versions 10.x, 11.x) only points at conda-forge's geant4 of the
+# same version. conda-forge has no Geant3, so 3.x is compiled: Geant3.21
+# with TGeant3, its ROOT Virtual Monte Carlo interface, on conda-forge's
+# root_base. The EIC eAST-physics-list Geant4 fork stays on the eic branch
+# and label (-c hep-forge/label/eic).
 # Plain "#" comments only: the publish workflow's version trimming strips
 # {% %}/{{ }} and yaml-loads the rest, so a Jinja comment block breaks it.
-{% set _raw_version = environ.get('ANACONDA_VERSION', version) %}
+{% set major = version.split('.')[0]|int %}
+{% set root_tag = (root or '')|replace('.', '') %}
 
 {% set name = environ.get('ANACONDA_PACKAGE', 'geant')|string|lower %}
 
 package:
   name: {{ name }}
-  version: "1!{{ _raw_version|replace("-", ".") }}"
+  version: {{ environ.get('ANACONDA_VERSION', version)|replace("-", ".") }}
+
+{% if major == 3 %}
+source:
+  url: "https://github.com/vmc-project/geant3/archive/refs/tags/{{ geant3_releases[version] }}.tar.gz"
+  sha256: {{ versions.get(version) }}
+{% endif %}
 
 build:
+{% if major == 3 %}
+  number: 0
+  string: "geant3_root{{ root_tag }}"
+  skip: true  # [not linux]
+  script: bash "${RECIPE_DIR}/build_geant3.sh"
+  # ROOT writes its module files with build paths in them
+  ignore_prefix_files:
+    - lib/*.pcm
+  run_exports:
+    - {{ pin_subpackage(name, max_pin="x.x.x") }}
+{% else %}
   number: 0
   noarch: generic
   # Consumers link conda-forge's Geant4 libraries; give them its pin.
-  # (Not pin_subpackage: it drops the epoch, see the eic branch recipe.)
   run_exports:
-    - {{ cf_package }} >={{ version }},<{{ version.rsplit('.', 1)[0] }}.{{ version.rsplit('.', 1)[1]|int + 1 }}.0a0
+    - geant4 >={{ version }},<{{ version.rsplit('.', 1)[0] }}.{{ version.rsplit('.', 1)[1]|int + 1 }}.0a0
+{% endif %}
 
 requirements:
+{% if major == 3 %}
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - {{ stdlib('c') }}
+    - cmake
+    - make
+  host:
+    - root_base {{ root }}.* cxx{{ root_cxx_standard }}*
+    - python
+    - vmc
   run:
-    - {{ cf_package }} {{ version }}.*
+    - {{ pin_compatible('root_base', exact=True) }}
+    - vmc
+{% else %}
+  run:
+    - geant4 {{ version }}.*
     # Geant4Config.cmake re-finds these with find_dependency(); conda-forge's
     # geant4 only brings the runtime libraries, so without the headers CMake
     # falls back to the system ones and rejects them (same list as the eic
@@ -52,8 +87,15 @@ requirements:
     - xorg-libxt
     - libgl-devel     # [linux]
     - libglu          # [linux]
+{% endif %}
 
 test:
+{% if major == 3 %}
+  commands:
+    - test -f "${PREFIX}/lib/libgeant321${SHLIB_EXT}"
+    - ls -d "${PREFIX}"/share/Geant3-*/data
+    - root -l -b -q -e 'gSystem->Load("libgeant321"); if (!TClass::GetClass("TGeant3TGeo")) exit(1);'
+{% else %}
   requires:
     - geant4-examples {{ version }}.*   # conda-forge's geant4 ships no examples
     - cmake
@@ -63,18 +105,24 @@ test:
   commands:
     - test "$(geant4-config --version)" = "{{ version }}"
     - bash "${RECIPE_DIR}/test_geant4.sh"
+{% endif %}
 
 about:
   home: "https://geant4.web.cern.ch"
   doc_url: "https://geant4.web.cern.ch/support"
   license: "LicenseRef-Geant4"
-  summary: "Geant4 detector simulation toolkit, from conda-forge's geant4 (EIC eAST fork on the eic label)"
+  summary: "Geant detector simulation: Geant4 from conda-forge's geant4, Geant3.21 + TGeant3 compiled (geant<4)"
   description: |
-    The default hep-forge "geant" installs conda-forge's geant4 of the same
-    version. The EIC fork (github.com/eic/geant4, vanilla Geant4 plus the
-    eASTPhysicsList) is built from this feedstock's eic branch and published
-    on the eic label: conda install -c hep-forge/label/eic geant
+    One package for both generations on the main label, chosen by version:
+    "geant" installs Geant4 (conda-forge's geant4 of the same version);
+    "geant<4" installs Geant3.21 with TGeant3, its ROOT Virtual Monte Carlo
+    interface (github.com/vmc-project/geant3), compiled here. The EIC
+    eAST-physics-list Geant4 fork is on the eic label.
 
 extra:
+  # keep Geant3 through the newest-2-versions trim
+  lts:
+    main:
+      - "3.21.4.5"
   recipe-maintainers:
     - meiyasan
