@@ -9,14 +9,14 @@ Feedstock for [geant](https://geant4.web.cern.ch) — part of [hep-forge](https:
 Builds linux-amd64 + linux-arm64 in one matrix workflow and uploads to the
 [hep-forge](https://anaconda.org/hep-forge) Anaconda channel.
 
-Geant4 detector simulation toolkit, from conda-forge's geant4 (EIC eAST fork on the eic label)
+Geant detector simulation: Geant4 from conda-forge's geant4, Geant3.21 + TGeant3 compiled (geant<4)
 
 ## Architectures
 
 | Architecture | Latest published |
 |--------------|------------------|
-| linux-amd64 (`linux-64`) | ✅ `1!11.4.3` |
-| linux-arm64 (`linux-aarch64`) | ✅ `1!11.4.3` |
+| linux-amd64 (`linux-64`) | ✅ `11.4.3` |
+| linux-arm64 (`linux-aarch64`) | ✅ `11.4.3` |
 
 _As of the last feedstock render; the badges above are live._
 
