@@ -15,8 +15,8 @@ Geant4 detector simulation toolkit, EIC eAST-physics-list fork
 
 | Architecture | Latest published |
 |--------------|------------------|
-| linux-amd64 (`linux-64`) | ✅ `1!4.11.4.1` |
-| linux-arm64 (`linux-aarch64`) | ✅ `1!4.11.4.1` |
+| linux-amd64 (`linux-64`) | ✅ `11.4.1` |
+| linux-arm64 (`linux-aarch64`) | ✅ `11.4.1` |
 
 _As of the last feedstock render; the badges above are live._
 

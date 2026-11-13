@@ -4,41 +4,15 @@
 {% set commits = {
     "11.4.1": "0efa58fb6848c2e0f50362d017c2526bf95dcf01"
 } %}
-# Geant4's own tag (e.g. "11.4.1") is that project's internal release
-# counter -- it does NOT mean "Geant generation 11". This package name
-# ("geant") is shared across generations and labels (main: conda-forge's
-# geant4; legacy: Geant3; eic: this eAST fork of Geant4),
-# so the published conda version is prefixed with the actual generation
-# number ("4.") to stay unambiguous even if someone compares versions
-# across labels. An epoch (1!) is required alongside the rename:
-# without it, conda would read "4.11.4.1" as numerically OLDER than the
-# already-published "11.4.1" (4 < 11 in the first component) and never
-# offer it as an upgrade.
-# NOTE: use plain "#" comments here, not Jinja "{# #}" block comments --
-# the publish workflow's Trim Old Versions step regex-strips only
-# "{% %}"/"{{ }}" before yaml.safe_load'ing this file directly (no Jinja
-# render), so a literal "{# #}" block survives and breaks that parse.
-{% set published_versions = {
-    "11.4.1": "1!4.11.4.1"
-} %}
-
 {% set version = environ.get('COMMIT_VERSION', None) %}
 {% set version = version or versions.keys()|first %}
 {% set version = version|string %}
 
 {% set name = environ.get('ANACONDA_PACKAGE', 'geant')|string|lower %}
 
-# The CI workflow always sets ANACONDA_VERSION (derived from the git
-# tag, e.g. "11.4.1") before invoking conda-build, so environ.get's
-# fallback below never actually fires for the normal tag-driven build
-# path -- map through published_versions on whichever value wins first,
-# tag-driven or manually overridden, so the generation-prefixed/epoched
-# form is always what actually gets published.
-{% set _raw_version = environ.get('ANACONDA_VERSION', version) %}
-
 package:
   name: {{ name }}
-  version: {{ published_versions.get(_raw_version, _raw_version)|replace("-", ".") }}
+  version: {{ environ.get('ANACONDA_VERSION', version)|replace("-", ".") }}
 
 source:
   # eic/geant4's "east-vX.Y.Z" branches are exactly vanilla Geant4 vX.Y.Z
@@ -54,14 +28,6 @@ build:
   number: 0
   string: "east"
   skip: true  # [win]
-  # No run_exports: conda-build's pin_subpackage()/apply_pin_expressions
-  # silently drops the conda epoch when computing the pin bounds (e.g.
-  # "1!4.11.4.1" -> ">=4.11.4,<4.11.5.0a0", epoch gone entirely). Combined
-  # with a consumer's own explicit "geant >=X" pin, that produces a
-  # mixed-epoch compound MatchSpec the solver can't satisfy against the
-  # actual epoch-1 package. Every current consumer (g4hepem, dd4hep)
-  # already writes its own explicit geant version pin by hand, so nothing
-  # relies on this auto-generated one.
 
 requirements:
   build:
